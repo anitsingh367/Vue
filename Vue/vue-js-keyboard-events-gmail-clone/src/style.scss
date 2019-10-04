@@ -1,0 +1,65 @@
+body,
+html {
+  height: 100%;
+}
+
+.email-wrap {
+  border: 1px #e5e5e5 solid;
+}
+
+.active {
+  box-shadow: inset 2px 0 0 0 #4d90f0;
+}
+
+.selected {
+  background: #ffc;
+}
+
+.email {
+  background: white;
+  font-weight: 600;
+  
+  &:not(:last-of-type) {
+    border-bottom: 1px #e5e5e5 solid;
+  }
+}
+
+.email.read {
+  font-weight: normal;
+  background: rgba(243,243,243,.85);
+}
+
+.email-sender {
+  min-width: 150px;
+}
+
+.email-body {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.btn-star {
+  color: rgba(0, 0, 0, .15);
+  
+  &:active {
+    color: rgba(0, 0, 0, .35);
+  }
+  
+  &.starred {
+    color: #fdd86e;
+  }
+}
+
+.key-wrap:last-of-type {
+  .plus {
+    display: none;
+  }
+}
+
+.key {
+  background: #eee;
+  border: 1px solid #ccc;
+  color: #777;
+  padding: 4px 8px;
+}

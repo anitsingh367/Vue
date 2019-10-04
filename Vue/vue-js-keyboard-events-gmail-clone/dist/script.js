@@ -1,0 +1,302 @@
+const initialState = () => {
+  return {
+    activeEmailIndex: 0,
+    selected: [],
+    emails: [{
+        subject: "About your recent performance...",
+        from: "boss@acme.com",
+        date: "Mar 16",
+        starred: false,
+        read: false
+      },
+
+      {
+        subject: "One does not 'unsubscribe' from my emails",
+        from: "Clark from InVision",
+        date: "Mar 15",
+        starred: false,
+        read: true
+      },
+
+      {
+        subject: "Tired of those Invision emails?",
+        from: "Taco from Trello",
+        date: "Mar 15",
+        starred: true,
+        read: true
+      },
+
+      {
+        subject: "Should Designers Needlepoint?",
+        from: "matt@matt.com",
+        date: "Mar 12",
+        starred: true,
+        read: false
+      },
+
+      {
+        subject: "Enough of these silly pens!",
+        from: "support@codepen.io",
+        date: "Mar 14",
+        starred: false,
+        read: true
+      }
+    ]
+  };
+
+
+
+};
+
+const store = new Vuex.Store({
+  state: initialState(),
+  getters: {
+    emailIsSelected: state => index => {
+      return _.includes(state.selected, index);
+    }
+  },
+
+  mutations: {
+    TOGGLE_STAR(state, index) {
+      state.emails[index].starred = !state.emails[index].starred;
+    },
+    CHECK_EMAIL(state, index) {
+      let alreadyChecked = _.includes(state.selected, index);
+      alreadyChecked ?
+        state.selected = _.cloneDeep(_.pull(state.selected, index)) :
+        state.selected.push(index);
+    },
+    SET_EMAIL_INDEX(state, index) {
+      state.activeEmailIndex = index;
+    },
+    ARCHIVE_EMAIL(state) {
+      state.emails = state.emails.filter((e, i) => !_.includes(state.selected, i));
+    },
+    MARK_AS_READ(state, index) {
+      state.emails[index].read = true;
+    },
+    MARK_AS_UNREAD(state, index) {
+      state.emails[index].read = false;
+    },
+    SET_SELECTED(state, selected) {
+      state.selected = selected;
+    }
+  },
+
+  actions: {
+    toggleStar({
+      commit
+    }, index) {
+      commit("TOGGLE_STAR", index);
+    },
+    checkEmail({
+      commit
+    }, index) {
+      commit("CHECK_EMAIL", index);
+    },
+    setEmailIndex({
+      commit
+    }, index) {
+      commit("SET_EMAIL_INDEX", index);
+    },
+    archiveEmail({
+      commit,
+      state
+    }) {
+      if (!state.selected.length) return;
+      commit('ARCHIVE_EMAIL');
+      commit('SET_SELECTED', []);
+      let newIndex = state.activeEmailIndex;
+
+      if (state.activeEmailIndex >= state.emails.length - 1) {
+        newIndex = state.emails.length - 1;
+      }
+
+      commit("SET_EMAIL_INDEX", newIndex);
+    },
+    markAsRead({
+      commit,
+      state
+    }, index) {
+      if (!state.selected.length) return;
+      state.selected.forEach(i => commit("MARK_AS_READ", i));
+    },
+    markAsUnread({
+      commit,
+      state
+    }, index) {
+      if (!state.selected.length) return;
+      state.selected.forEach(i => commit("MARK_AS_UNREAD", i));
+    },
+    selectAll({
+      commit,
+      state
+    }) {
+      state.selected = state.emails.map((e, i) => i);
+    },
+    deselectAll({
+      commit,
+      state
+    }) {
+      state.selected = [];
+    }
+  }
+});
+
+
+
+Vue.component("star-button", {
+  template: "#star-button",
+  props: ["starred", "index"],
+  computed: {
+    iconClass() {
+      return this.starred ? "fas" : "far";
+    }
+  },
+
+  methods: {
+    star() {
+      this.$store.dispatch("toggleStar", this.index);
+    }
+  }
+});
+
+
+
+Vue.component("email", {
+  template: "#email",
+  props: ["email", "index"],
+  computed: {
+    isActive() {
+      return this.index === this.$store.state.activeEmailIndex;
+    },
+    isSelected: {
+      get() {
+        return this.$store.getters.emailIsSelected(this.index);
+      },
+      set(nv) {
+        this.$store.dispatch("checkEmail", this.index);
+      }
+    }
+  }
+});
+
+
+
+
+new Vue({
+  store,
+  el: "#app",
+  data() {
+    return {
+      shortcuts: [{
+          keys: ['↑'],
+          label: 'Move Up'
+        },
+        {
+          keys: ['↓'],
+          label: 'Move Down'
+        },
+        {
+          keys: ['X'],
+          label: 'Select Email'
+        },
+        {
+          keys: ['S'],
+          label: 'Star Email'
+        },
+        {
+          keys: ['E'],
+          label: 'Archive Email'
+        },
+        {
+          keys: ['shift', 'I'],
+          label: 'Mark As Read'
+        },
+        {
+          keys: ['shift', 'U'],
+          label: 'Mark As Unread'
+        },
+        {
+          keys: ['*', 'A'],
+          label: 'Select All'
+        },
+        {
+          keys: ['*', 'n'],
+          label: 'Deselect All'
+        }
+      ]
+    };
+
+
+  },
+  computed: {
+    emails() {
+      return this.$store.state.emails;
+    },
+    hasEmails() {
+      return this.emails.length > 0;
+    },
+    selected() {
+      return this.$store.state.selected;
+    },
+    active() {
+      return this.$store.state.activeEmailIndex;
+    }
+  },
+
+  methods: {
+    initKeyboardShortcuts() {
+      Mousetrap.bind("up", this.handleUp, 'keydown');
+      Mousetrap.bind("down", this.handleDown, 'keydown');
+      Mousetrap.bind("x", this.handleXSelect, 'keydown');
+      Mousetrap.bind("s", this.handleStar, 'keydown');
+      Mousetrap.bind("e", this.handleArchive);
+      Mousetrap.bind("shift+i", this.handleMarkAsRead);
+      Mousetrap.bind("shift+u", this.handleMarkAsUnread);
+      Mousetrap.bind("* a", this.handleSelectAll);
+      Mousetrap.bind("* n", this.handleDeselectall);
+    },
+    handleXSelect() {
+      store.dispatch("checkEmail", this.active);
+    },
+    handleStar() {
+      store.dispatch("toggleStar", this.active);
+    },
+    handleArchive() {
+      store.dispatch("archiveEmail");
+    },
+    handleMarkAsRead() {
+      store.dispatch("markAsRead");
+    },
+    handleMarkAsUnread() {
+      store.dispatch("markAsUnread");
+    },
+    handleSelectAll() {
+      store.dispatch("selectAll");
+    },
+    handleDeselectall() {
+      store.dispatch("deselectAll");
+    },
+    handleUp() {
+      let newIndex = this.$store.state.activeEmailIndex - 1;
+      if (newIndex >= 0) {
+        this.$store.dispatch("setEmailIndex", newIndex);
+      }
+    },
+    handleDown() {
+      let newIndex = this.$store.state.activeEmailIndex + 1;
+      if (newIndex < this.emails.length) {
+        this.$store.dispatch("setEmailIndex", newIndex);
+      }
+    },
+    reset() {
+      this.$store.replaceState(initialState());
+    }
+  },
+
+  mounted() {
+    this.initKeyboardShortcuts();
+    // window.focus()
+  }
+});

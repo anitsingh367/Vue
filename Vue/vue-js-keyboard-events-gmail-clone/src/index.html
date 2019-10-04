@@ -1,0 +1,53 @@
+<div id="app" ref="app">
+  <section class="border-b p-8">
+    <div class="email-wrap shadow mb-4" v-if="hasEmails">
+      <email
+      v-for="(email, index) in emails"
+      :email="email"
+      :index="index"
+      :key="index"></email>
+    </div>
+    
+    <button class="bg-blue white px-3 py-2 font-medium text-white" @click="reset">Reset State</button>
+  </section>
+  <section class="p-8">
+    <h1 class="text-2xl font-light">Keyboard Shortcuts</h1>
+    <ul class="list-reset mt-4">
+      <li class="flex items-center mb-2" v-for="(shortcut, index) in shortcuts" :key="index">
+        <div class="key-wrap flex items-center justify-center" v-for="(key, kIndex) in shortcut.keys" :key="kIndex">
+          <div class="key">{{key}}</div>
+          <span class="plus mx-1 text-grey-dark">+</span>
+        </div>
+        <span class="ml-2">{{ shortcut.label }} </span>
+      </li>
+    </ul>
+  </section>
+</div>
+
+<script type="text/x-template" id="email">
+  <div
+    class="email flex justify-between p-3"
+    :class="{'active': isActive, 'selected': isSelected, 'read': email.read}">
+    <div class="email-left flex items-center">
+      <input class="mr-2" type="checkbox" v-model="isSelected">
+      <star-button class="mr-2" :index="index" :starred="email.starred" />
+      <span class="email-sender">{{email.from}}</span>
+    </div>
+    <div class="email-body flex-auto pl-4">
+      <span>{{email.subject}}</span>
+    </div>
+    <div class="email-right">
+      <span>{{email.date}}</span>
+    </div>
+  </div>
+</script>
+
+<script type="text/x-template" id="star-button">
+  <button
+    @click="star"
+    :class="{'starred': starred}"
+    class="inline-flex items-center justify-center btn-star">
+    <i class="fa-star" :class="iconClass"></i>
+  </button>
+</script>
+

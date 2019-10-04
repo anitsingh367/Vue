@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Vue.js Keyboard Events [Gmail Clone]</title>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/solid.css"
+    integrity="sha384-v2Tw72dyUXeU3y4aM2Y0tBJQkGfplr39mxZqlTBDUZAb9BGoC40+rdFCG0m10lXk" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/regular.css"
+    integrity="sha384-A/oR8MwZKeyJS+Y0tLZ16QIyje/AmPduwrvjeH6NLiLsp4cdE4uRJl8zobWXBm4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/fontawesome.css"
+    integrity="sha384-q3jl8XQu1OpdLgGFvNRnPdj5VIlCvgsDQTQB6owSOHWlAurxul7f+JpUOVdAiJ5P" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/tailwindcss/dist/tailwind.min.css'>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <!-- partial:index.partial.html -->
+  <div id="app" ref="app">
+    <section class="border-b p-8">
+      <div class="email-wrap shadow mb-4" v-if="hasEmails">
+        <email v-for="(email, index) in emails" :email="email" :index="index" :key="index"></email>
+      </div>
+
+      <button class="bg-blue white px-3 py-2 font-medium text-white" @click="reset">Reset State</button>
+    </section>
+    <section class="p-8">
+      <h1 class="text-2xl font-light">Keyboard Shortcuts</h1>
+      <ul class="list-reset mt-4">
+        <li class="flex items-center mb-2" v-for="(shortcut, index) in shortcuts" :key="index">
+          <div class="key-wrap flex items-center justify-center" v-for="(key, kIndex) in shortcut.keys" :key="kIndex">
+            <div class="key">{{key}}</div>
+            <span class="plus mx-1 text-grey-dark">+</span>
+          </div>
+          <span class="ml-2">{{ shortcut.label }} </span>
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <script type="text/x-template" id="email">
+  <div
+    class="email flex justify-between p-3"
+    :class="{'active': isActive, 'selected': isSelected, 'read': email.read}">
+    <div class="email-left flex items-center">
+      <input class="mr-2" type="checkbox" v-model="isSelected">
+      <star-button class="mr-2" :index="index" :starred="email.starred" />
+      <span class="email-sender">{{email.from}}</span>
+    </div>
+    <div class="email-body flex-auto pl-4">
+      <span>{{email.subject}}</span>
+    </div>
+    <div class = "toggle">
+        <span class = "tools">
+            <div class="circle-icon">
+                <i class="fas fa-archive"></i>
+              </div>
+              <div class="circle-icon">
+                <i class="fas fa-trash"></i>
+              </div>
+              <div class="circle-icon">
+                <i class="fas fa-envelope-open"></i>
+              </div>
+              <div class="circle-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+        </span>
+    </div>
+    <div class="email-right">
+      <span>{{email.date}}</span>
+    </div>
+  </div>
+</script>
+
+  <script type="text/x-template" id="star-button">
+  <button
+    @click="star"
+    :class="{'starred': starred}"
+    class="inline-flex items-center justify-center btn-star">
+    <i class="fa-star" :class="iconClass"></i>
+  </button>
+</script>
+  <!-- partial -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/vuex/3.0.1/vuex.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.5/lodash.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/mousetrap/1.6.1/mousetrap.js'></script>
+  <script src="./script.js"></script>
+
+</body>
+
+</html>
